@@ -19,9 +19,9 @@ message NewsList {
 
 
 service NewsService {
-    rpc GetAllNews (Empty) return (NewsList) {}
-    rpc GetNews (NewId) return (News) {}
-    rpc DeleteNews (NewId) retucn (Empty) {}
-    rpc EditNews (News) return (News) {}
-    rpc AddNews (News) return (News) {}
+    rpc GetAllNews (Empty) returns (NewsList) {}
+    rpc GetNews (NewId) returns (News) {}
+    rpc DeleteNews (NewId) returns (Empty) {}
+    rpc EditNews (News) returns (News) {}
+    rpc AddNews (News) returns (News) {}
 }
