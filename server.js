@@ -1,12 +1,7 @@
+import * as Yup from "yup";
 import grpc from "@grpc/grpc-js";
 import protoLoader from "@grpc/proto-loader";
-// import { createNewsSchema } from "../newsValidator";
-import { object as YupObject, string as YupString } from "yup";
-
-const createNewsSchema = YupObject().shape({
-    title: YupString().required(),
-    body: YupString().required(),
-});
+import { validateCreateNews } from "./newsValidator.js";
 const PROTO_PATH = "./news.proto";
 const options = {
     keepCase: true,
@@ -24,24 +19,6 @@ const news = [
     { id: "2", title: "Note 22", body: "Content 2", postImage: "Post Image 2" }
 ];
 
-async function validateCreateNews(data) {
-    try {
-        // Validate the data against the schema
-        const validatedData = await createNewsSchema.validate(data, { abortEarly: false });
-        return validatedData;
-    } catch (error) {
-        throw new Error(error.errors);
-    }
-}
-const createNews = (call, callback) => {
-    console.log({ call });
-
-    // Your logic to handle the request
-    const response = {
-        // Set your response fields here
-    };
-    callback(null, response);
-}
 
 server.addService(newsProto.NewsService.service, {
     // get All News
