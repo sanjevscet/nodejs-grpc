@@ -12,7 +12,8 @@
   "license": "ISC",
   "dependencies": {
     "@grpc/grpc-js": "^1.8.14",
-    "@grpc/proto-loader": "^0.7.7"
+    "@grpc/proto-loader": "^0.7.7",
+    "yup": "^1.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"

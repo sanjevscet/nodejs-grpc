@@ -1,6 +1,12 @@
 import grpc from "@grpc/grpc-js";
 import protoLoader from "@grpc/proto-loader";
+// import { createNewsSchema } from "../newsValidator";
+import { object as YupObject, string as YupString } from "yup";
 
+const createNewsSchema = YupObject().shape({
+    title: YupString().required(),
+    body: YupString().required(),
+});
 const PROTO_PATH = "./news.proto";
 const options = {
     keepCase: true,
@@ -13,10 +19,29 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, options);
 const newsProto = grpc.loadPackageDefinition(packageDefinition)
 const server = new grpc.Server();
 
-let news = [
+const news = [
     { id: "1", title: "Note 12", body: "Content 1", postImage: "Post Image 1" },
     { id: "2", title: "Note 22", body: "Content 2", postImage: "Post Image 2" }
 ];
+
+async function validateCreateNews(data) {
+    try {
+        // Validate the data against the schema
+        const validatedData = await createNewsSchema.validate(data, { abortEarly: false });
+        return validatedData;
+    } catch (error) {
+        throw new Error(error.errors);
+    }
+}
+const createNews = (call, callback) => {
+    console.log({ call });
+
+    // Your logic to handle the request
+    const response = {
+        // Set your response fields here
+    };
+    callback(null, response);
+}
 
 server.addService(newsProto.NewsService.service, {
     // get All News
@@ -43,9 +68,20 @@ server.addService(newsProto.NewsService.service, {
     // delete News By Id
     deleteNews: (data, callback) => {
         const newsId = data.request.id;
-        news = news.filter(({ id }) => id !== newsId)
+        const index = news.findIndex(({ id }) => id === newsId);
+        console.log({ index })
+        if (index !== -1) {
+            news.splice(index, 0)
+            callback(null, {})
 
-        callback(null, {})
+        }
+        const error = {
+            code: grpc.status.INVALID_ARGUMENT,
+            message: 'Sanjeev, Data not found for given Id!',
+        };
+        callback(error)
+        // news = news.filter(({ id }) => id !== newsId)
+
     },
 
     // Update Passed Id's News
@@ -66,6 +102,21 @@ server.addService(newsProto.NewsService.service, {
         console.log({ news })
 
         callback(null, _news)
+    },
+    createNews: async (call, callback) => {
+        const { request: data } = call;
+        try {
+            await validateCreateNews(data);
+            const { id, title, body, postImage } = data;
+            news.push({ id, title, body, postImage })
+            // console.log({ data });
+            callback(null, data)
+
+        } catch (error) {
+            console.log({ error, m: error.message })
+            callback({ message: error.message, code: grpc.status.INVALID_ARGUMENT })
+        }
+        // console.log({ data })
     },
 });
 
